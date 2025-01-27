@@ -42,8 +42,8 @@ Abra o vscode
 
     code .
 
-Usuario: admin
-Senha: admin
+- Usuario: admin
+- Senha: admin
 
 Todas as dags devem estar prontas para serem rodadas.
 
@@ -62,16 +62,16 @@ Conforme a imagem abaixo configure:
 ![Configuração](images/image-2.png)
 
 
-HOST: mega-zordian-7326.j77.aws-us-east-1.cockroachlabs.cloud
-USER: megazorders
-PASSWORD: JBQROkforHRxPkyN2-3LeQ
-PORTA: 26257
+- HOST: mega-zordian-7326.j77.aws-us-east-1.cockroachlabs.cloud
+- USER: megazorders
+- PASSWORD: JBQROkforHRxPkyN2-3LeQ
+- PORTA: 26257
 
 BANCOS:
 
-RAW: defaultdb
-REF: Refined_stage
-MASTER: Master_stage
+- RAW: defaultdb
+- REF: Refined_stage
+- MASTER: Master_stage
 
 Utilização do cockroachdb, esse banco foi selecionado para que o avaliador consiga acessar todos os dados via uma ferramenta de gerenciamento de banco de forma facilitada.
 
