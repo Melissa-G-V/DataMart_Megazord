@@ -1,0 +1,13 @@
+docker:
+  build:
+    context: .
+    dockerfile: Dockerfile
+  volumes:
+    - C:/Users/melis/DATAMARTS:/usr/local/airflow/DATAMARTS
+  environment:
+    - AIRFLOW__CORE__LOAD_EXAMPLES=False
+    - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+    - AIRFLOW__CORE__DAGS_FOLDER=/usr/local/airflow/dags
+  ports:
+    - 8080:8080
+    - 5555:5555
