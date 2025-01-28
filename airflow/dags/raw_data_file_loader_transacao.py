@@ -116,7 +116,7 @@ with DAG(
         task_id='criar_tabela',
         postgres_conn_id='raw_conection',
         sql="""
-        
+        CREATE INDEX idx_id_transactions ON transacoes (id_transacao, data_transacao);
         );
         """,
     )

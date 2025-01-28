@@ -72,7 +72,7 @@ def criar_index(**kwargs):
     engine = create_engine(DATABASE_REF_URL)
     
     create_query = """
-    CREATE INDEX idx_id_transactions ON ref_transacoes (id_transacao, data_transacao);
+    CREATE INDEX idx_id_produtos ON ref_produtos (id);
     """
     try:
         with engine.connect() as connection:
