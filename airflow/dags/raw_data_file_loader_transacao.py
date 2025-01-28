@@ -111,6 +111,16 @@ with DAG(
         """,
     )
     
+    
+    criar_index_task = PostgresOperator(
+        task_id='criar_tabela',
+        postgres_conn_id='raw_conection',
+        sql="""
+        
+        );
+        """,
+    )
+    
     setar_staging_to_raw = PostgresOperator(
         task_id='set_staging_to_raw',
         postgres_conn_id='raw_conection',

@@ -7,7 +7,7 @@ import os
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
 
-
+""" Colocando as strings de conexão """
 DATABASE_RAW_URL = "cockroachdb+psycopg2://megazorders:JBQROkforHRxPkyN2-3LeQ@mega-zordian-7326.j77.aws-us-east-1.cockroachlabs.cloud:26257/defaultdb"
 DATABASE_REF_URL = "cockroachdb+psycopg2://megazorders:JBQROkforHRxPkyN2-3LeQ@mega-zordian-7326.j77.aws-us-east-1.cockroachlabs.cloud:26257/Refined_stage"
 
@@ -37,6 +37,23 @@ def criar_tabela(**kwargs):
             print("SUCCESS.")
     except Exception as e:
         print(f"Error: {e}")
+        
+        
+def criar_index(**kwargs):
+    """ Gerando um index"""
+    DATABASE_REF_URL = "cockroachdb+psycopg2://megazorders:JBQROkforHRxPkyN2-3LeQ@mega-zordian-7326.j77.aws-us-east-1.cockroachlabs.cloud:26257/Refined_stage"
+    engine = create_engine(DATABASE_REF_URL)
+    
+    create_query = """
+            CREATE INDEX idx_id_transactions ON transacoes (id_transacao, data_transacao);
+    """
+    try:
+        with engine.connect() as connection:
+            connection.execute(create_query)
+            print("SUCCESS.")
+    except Exception as e:
+        print(f"Error: {e}")
+
 
 def transferir_e_popular():
     raw_engine = create_engine(DATABASE_RAW_URL)
@@ -44,6 +61,9 @@ def transferir_e_popular():
         staging_transacoes = pd.read_sql("SELECT * FROM staging_transacoes", raw_conn) 
     master_engine = create_engine(DATABASE_REF_URL)
     with master_engine.connect() as master_conn:
+        
+        """ Criando uma tabela de staging devido os ids extras e faltantes"""
+        
         staging_transacoes.to_sql("temp_staging_transacoes", master_conn, if_exists="replace", index=False)
         join_query = """
 INSERT INTO ref_transacoes (id_transacao, id_cliente,nome_cliente,sobrenome,nome_produto ,descricao, preco, ean, id_produto, quantidade, data_transacao)
@@ -79,6 +99,8 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
+""" O particionamento do cockroachdb é realizado de forma automatica via a chave principal """
+
 with DAG(
     'ref_transacoes_pipeline',
     default_args=default_args,
@@ -99,4 +121,10 @@ with DAG(
         provide_context=True,
     )
     
-    criar_tabela_task >> transferir_popular
+    criar_index_task = PythonOperator(
+        task_id='criar_index',
+        python_callable=criar_index,
+        provide_context=True,
+    )
+    
+    criar_tabela_task >> transferir_popular >> criar_index_task

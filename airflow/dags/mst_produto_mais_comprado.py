@@ -13,28 +13,7 @@ def criar_tabelas_agregadas(**kwargs):
     refined_engine = create_engine(DATABASE_REF_URL)
     master_engine = create_engine(DATABASE_MASTER_URL)
 
-    # Queries for aggregated data
     queries = {
-        "receita_total_por_cliente": """
-            SELECT 
-                id_cliente, 
-                nome_cliente, 
-                sobrenome, 
-                SUM(preco * quantidade) AS receita_total
-            FROM ref_transacoes
-            GROUP BY id_cliente, nome_cliente, sobrenome;
-        """,
-
-        "numero_transacoes_por_cliente": """
-            SELECT 
-                id_cliente, 
-                nome_cliente, 
-                sobrenome, 
-                COUNT(id_transacao) AS numero_transacoes
-            FROM ref_transacoes
-            GROUP BY id_cliente, nome_cliente, sobrenome;
-        """,
-
         "produto_mais_comprado_por_cliente": """
             SELECT 
                 id_cliente, 
@@ -79,16 +58,14 @@ default_args = {
     'retry_delay': timedelta(minutes=5),
 }
 
-# Define the DAG
-with DAG(
-    'master_transformation',
-    default_args=default_args,
-    description='Transform and aggregate data into master database',
-    schedule_interval=None,
-    start_date=datetime(2023, 1, 1),
-    catchup=False,
-) as dag:
 
+with DAG(
+    'master_produto_mais_comprado',
+    default_args=default_args,
+    schedule_interval=None,
+    catchup=False,
+    max_active_tasks=4
+) as dag:
 
     criar_tabelas_agregadas_task = PythonOperator(
         task_id='criar_tabelas_agregadas',
@@ -96,3 +73,4 @@ with DAG(
         provide_context=True,
     )
     criar_tabelas_agregadas_task
+

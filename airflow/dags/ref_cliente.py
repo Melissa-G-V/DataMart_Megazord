@@ -91,6 +91,22 @@ def criar_tabela(**kwargs):
         print(f"Error: {e}")
 
 
+        
+def criar_index(**kwargs):
+    """ Gerando um index"""
+    DATABASE_REF_URL = "cockroachdb+psycopg2://megazorders:JBQROkforHRxPkyN2-3LeQ@mega-zordian-7326.j77.aws-us-east-1.cockroachlabs.cloud:26257/Refined_stage"
+    engine = create_engine(DATABASE_REF_URL)
+    
+    create_query = """
+        CREATE INDEX idx_id_cliente ON ref_clientes (id);
+    """
+    try:
+        with engine.connect() as connection:
+            connection.execute(create_query)
+            print("SUCCESS.")
+    except Exception as e:
+        print(f"Error: {e}")
+
 
 default_args = {
     'owner': 'airflow',

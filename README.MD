@@ -75,6 +75,8 @@ BANCOS:
 
 Utilização do cockroachdb, esse banco foi selecionado para que o avaliador consiga acessar todos os dados via uma ferramenta de gerenciamento de banco de forma facilitada.
 
+Lembrando que na construção do pipeline voltado para CockroachDB já como não existe um conector nativo airflow se utiliza ou conector postgresql or conector psycopg2 e neste caso foi preferido utilizar psycopg2 para facilitação.
+
 A separação dos dados em camadas:
 
 RAW o dado cru como veio da fonte, esta fonte se encontra na pasta airflow/rawdata.
@@ -95,3 +97,31 @@ Por fim a ultima tabela é gerada no banco MASTER.
 
 
 ![MASTER STAGE](images/image-5.png)
+
+
+
+### Processamentos
+
+Airflow permite processamento em paralelo quando se configura quantos trabalhadores(workers) ativos se pode manter em paralelo escritos em Max_Active_Tasks.
+
+Uma DAG não pode ser ciclica então todos os fluxos são unidirecionais, então pode se gerar um fluxo bifurcado onde é possivel gerar tasks em paralelo e tasks dependentes uma das outras.
+
+Cada fluxo do airflow pode no maximo 12 workers ativos ao mesmo tempo default, e pode ser ajustado no pool da ferramenta.
+
+### Indexação:
+
+Foram geradas nas tabelas as seguintes indexações:
+
+CREATE INDEX idx_id_cliente ON clientes (id);
+CREATE INDEX idx_id_produtos ON produtos (id);
+CREATE INDEX idx_id_transactions ON transacoes (id_transacao, data_transacao);
+CREATE INDEX idx_id_stg_transactions ON temp_staging_transacoes (id_transacao, data_transacao);
+CREATE INDEX idx_id_cliente ON ref_clientes (id);
+CREATE INDEX idx_id_cliente_email ON ref_clientes (email);
+CREATE INDEX idx_id_produtos ON ref_produtos (id);
+CREATE INDEX idx_id_transactions ON ref_transacoes (id_transacao, data_transacao);
+
+
+
+
+

@@ -26,6 +26,19 @@ def criar_tabela():
         except Exception as e:
             print(f"Erro: {e}")
 
+def criar_index():
+    engine = create_engine(DATABASE_URL)
+    with engine.connect() as conn:
+        sql = """
+            CREATE INDEX idx_id_clientes ON clientes (id);
+        """
+        try:
+            conn.execute(sql)
+            print("Tabela criada.")
+        except Exception as e:
+            print(f"Erro: {e}")
+
+
 def processamento_etl():
 
     print("Current Directory:", os.getcwd())
@@ -73,11 +86,17 @@ with DAG(
         task_id="criar_tabela",
         python_callable=criar_tabela,
     )
+    
+    criar_index_task = PythonOperator(
+        task_id="criar_index",
+        python_callable=criar_index,
+    )
+
 
     salvar_dados_task = PythonOperator(
         task_id="processamento_etl",
         python_callable=processamento_etl,
     )
 
-    criar_tabela_task >> salvar_dados_task
+    criar_tabela_task >> salvar_dados_task >> criar_index_task
     #criar_tabela_task

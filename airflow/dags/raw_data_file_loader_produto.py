@@ -99,5 +99,14 @@ with DAG(
         """,
     )
     
+    
+    criar_index_task = PostgresOperator(
+        task_id='criar_index',
+        postgres_conn_id='raw_conection',
+        sql="""
+            CREATE INDEX idx_id_produto ON produtos (id);
+        """,
+    )
+    
 
-    criar_tabela_task >> salvar_dados_task 
+    criar_tabela_task >> salvar_dados_task >> criar_index_task

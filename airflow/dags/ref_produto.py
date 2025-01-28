@@ -25,11 +25,11 @@ def extrair_do_raw(**kwargs):
 
 
 
-def hashmento(value1, value2,value3):
-    """ Gerando uma hash para fazer certeza que o dado não está duplicado,
-    devido poder ter pessoas diferentes com o mesmo email e telefone mas nomes diferentes."""
-    combined = f"{value1}{value2}{value3}"
-    return hashlib.sha256(combined.encode('utf-8')).hexdigest()
+# def hashmento(value1, value2,value3):
+#     """ Gerando uma hash para fazer certeza que o dado não está duplicado,
+#     devido poder ter pessoas diferentes com o mesmo email e telefone mas nomes diferentes."""
+#     combined = f"{value1}{value2}{value3}"
+#     return hashlib.sha256(combined.encode('utf-8')).hexdigest()
 
 def remove_special_characters(value):
     """Remover caracteres especiais"""
@@ -66,6 +66,20 @@ def transform_data(**kwargs):
     with engine.connect() as conn:
         df.to_sql('ref_produtos', conn, if_exists='append', index=False)
         
+def criar_index(**kwargs):
+    """ Gerando um index"""
+    DATABASE_REF_URL = "cockroachdb+psycopg2://megazorders:JBQROkforHRxPkyN2-3LeQ@mega-zordian-7326.j77.aws-us-east-1.cockroachlabs.cloud:26257/Refined_stage"
+    engine = create_engine(DATABASE_REF_URL)
+    
+    create_query = """
+    CREATE INDEX idx_id_transactions ON ref_transacoes (id_transacao, data_transacao);
+    """
+    try:
+        with engine.connect() as connection:
+            connection.execute(create_query)
+            print("SUCCESS.")
+    except Exception as e:
+        print(f"Error: {e}")
 
 
 
@@ -119,6 +133,11 @@ with DAG('ref_produto_pipeline', default_args=default_args, schedule_interval=No
         provide_context=True,
     )
 
+    criar_index_task = PythonOperator(
+        task_id='criar_index',
+        python_callable=criar_index,
+        provide_context=True,
+    )
 
 
-    extract >> criar_tabela_task >> transforma_dado 
+    extract >> criar_tabela_task >> transforma_dado  >> criar_index_task
